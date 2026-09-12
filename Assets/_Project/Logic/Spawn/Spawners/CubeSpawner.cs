@@ -14,6 +14,8 @@ namespace Spawn.Spawners
         [Range(0.1f, 1f)]
         [SerializeField] private float _minDelayInSeconds;
 
+        private Action<Cube> _cubeDiedCached;
+
         public event Action<Vector3> CubeDied;
 
         private void Start()
@@ -24,12 +26,15 @@ namespace Spawn.Spawners
             Spawning().Forget();
         }
 
+        protected override void OnAwake() =>
+            _cubeDiedCached = OnCubeDied;
+
         private async UniTaskVoid Spawning()
         {
             while (enabled)
             {
                 Cube cube = GetObject();
-                cube.LifetimeEnded += OnCubeDied;
+                cube.LifetimeEnded += _cubeDiedCached;
                 cube.transform.position = RandomGenerator.GetRandomPoint(_spawnArea.bounds);
 
                 await UniTask.WaitForSeconds(_minDelayInSeconds);
@@ -38,7 +43,7 @@ namespace Spawn.Spawners
 
         private void OnCubeDied(Cube cube)
         {
-            cube.LifetimeEnded -= OnCubeDied;
+            cube.LifetimeEnded -= _cubeDiedCached;
             CubeDied?.Invoke(cube.transform.position);
         }
     }
