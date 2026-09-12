@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Helpers;
 using Utilities;
 
 namespace Spawn.SpawnObjects
@@ -13,6 +14,7 @@ namespace Spawn.SpawnObjects
         private const float MaxLifetimeInSeconds = 5f;
 
         [SerializeField] private Renderer _renderer;
+        [SerializeField] private SurfaceChecker _surfaceChecker;
 
         [field: SerializeField] public Rigidbody Rigidbody { get; private set; }
 
@@ -23,8 +25,12 @@ namespace Spawn.SpawnObjects
 
         private static float LifetimeDelay => RandomGenerator.Range(MinLifetimeInSeconds, MaxLifetimeInSeconds);
 
-        private void Awake() =>
+        private void Awake()
+        {
             _originalColor = _renderer.material.color;
+
+            _surfaceChecker.SurfaceHit += OnSurfaceHit;
+        }
 
         private void OnValidate()
         {
@@ -35,10 +41,16 @@ namespace Spawn.SpawnObjects
                 Rigidbody = GetComponent<Rigidbody>();
         }
 
-        private void OnDestroy() =>
+        private void OnDestroy()
+        {
             LifetimeEnded = null;
+            _surfaceChecker.SurfaceHit -= OnSurfaceHit;
+        }
 
-        public async UniTaskVoid Hit()
+        private void OnSurfaceHit(ISurface surface) =>
+            Hit().Forget();
+
+        private async UniTaskVoid Hit()
         {
             if (_isColorChanged)
                 return;

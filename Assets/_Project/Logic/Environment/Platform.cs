@@ -1,14 +1,9 @@
 using UnityEngine;
-using Spawn.SpawnObjects;
+using Helpers;
 
 namespace Environment
 {
-    internal sealed class Platform : MonoBehaviour
+    internal sealed class Platform : MonoBehaviour, ISurface
     {
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (collision.gameObject.TryGetComponent(out Cube cube))
-                cube.Hit().Forget();
-        }
     }
 }
