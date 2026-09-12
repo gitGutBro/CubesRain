@@ -8,7 +8,7 @@ namespace Spawn.SpawnObjects
 {
     [RequireComponent(typeof(Renderer))]
     [RequireComponent(typeof(Rigidbody))]
-    internal sealed class Cube : MonoBehaviour
+    internal sealed class Cube : MonoBehaviour, IExpirable<Cube>
     {
         private const float MinLifetimeInSeconds = 2f;
         private const float MaxLifetimeInSeconds = 5f;

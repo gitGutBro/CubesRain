@@ -7,7 +7,7 @@ using Helpers;
 namespace Spawn.SpawnObjects
 {
     [RequireComponent(typeof(Renderer))]
-    internal sealed class Bomb : MonoBehaviour
+    internal sealed class Bomb : MonoBehaviour, IExpirable<Bomb>
     {
         [SerializeField] private Renderer _renderer;
         [SerializeField] private Fader _fader;
@@ -16,8 +16,9 @@ namespace Spawn.SpawnObjects
         private bool _isActive;
         private Material _material;
         private Color _initialColor;
-        private Action<Bomb> _returner;
         private CancellationTokenSource _lifetimeCts;
+
+        public event Action<Bomb> LifetimeEnded;
 
         private void Awake()
         {
@@ -38,17 +39,8 @@ namespace Spawn.SpawnObjects
             _lifetimeCts = null;
         }
 
-        public void SetReturner(Action<Bomb> returner) =>
-            _returner = returner;
-
         public async UniTaskVoid Activate()
         {
-            if (_returner is null)
-            {
-                Debug.LogException(new NullReferenceException("Returner is null"));
-                return;
-            }
-
             if (_isActive)
             {
                 Debug.LogWarning($"Bomb is already active, ignoring repeated {nameof(Activate)} call", this);
@@ -56,7 +48,6 @@ namespace Spawn.SpawnObjects
             }
 
             _isActive = true;
-
             _lifetimeCts?.Dispose();
             _lifetimeCts = new CancellationTokenSource();
 
@@ -75,7 +66,7 @@ namespace Spawn.SpawnObjects
             }
 
             _material.color = _initialColor;
-            _returner(this);
+            LifetimeEnded?.Invoke(this);
         }
     }
 }

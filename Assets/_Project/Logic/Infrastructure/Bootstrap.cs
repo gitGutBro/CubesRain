@@ -1,6 +1,7 @@
 using UnityEngine;
 using Spawn;
 using Spawn.Spawners;
+using Spawn.SpawnObjects;
 
 namespace Infrastructure
 {
@@ -17,7 +18,7 @@ namespace Infrastructure
 
         private void Awake()
         {
-            _cubeSpawner.InitBombSpawn(_bombSpawner.Spawn);
+            _cubeSpawner.CubeDied += _bombSpawner.Spawn;
 
             InitModelView(_cubeSpawner, _cubeStatsModel, _cubeSpawnStatsView);
             InitModelView(_bombSpawner, _bombStatsModel, _bombSpawnStatsView);
@@ -25,12 +26,14 @@ namespace Infrastructure
 
         private void OnDestroy()
         {
+            _cubeSpawner.CubeDied -= _bombSpawner.Spawn;
+
             Unsubscribe(_cubeStatsModel, _cubeSpawnStatsView);
             Unsubscribe(_bombStatsModel, _bombSpawnStatsView);
         }
 
         private static void InitModelView<TSpawnable>(Spawner<TSpawnable> spawner, SpawnStatsModel statsModel,
-            SpawnStatsView statsView) where TSpawnable : MonoBehaviour
+            SpawnStatsView statsView) where TSpawnable : MonoBehaviour, IExpirable<TSpawnable>
         {
             statsModel.SpawnedAdded += statsView.OnUpdateTotalSpawned;
             statsModel.CreatedAdded += statsView.OnUpdateCreated;

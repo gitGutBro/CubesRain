@@ -14,40 +14,32 @@ namespace Spawn.Spawners
         [Range(0.1f, 1f)]
         [SerializeField] private float _minDelayInSeconds;
 
-        private Action<Vector3> _spawnBomb;
+        public event Action<Vector3> CubeDied;
 
         private void Start()
         {
-            if (_spawnBomb == null)
-                throw new NullReferenceException($"{nameof(_spawnBomb)} not init");
-
             if (IsStatsModelNull)
-                throw new NullReferenceException($"Model not init");
+                throw new NullReferenceException("Model not init");
 
             Spawning().Forget();
         }
 
-        public void InitBombSpawn(Action<Vector3> spawnBomb) =>
-            _spawnBomb = spawnBomb;
-
         private async UniTaskVoid Spawning()
         {
-            Action<Cube> onSpawnBombAtCached = OnSpawnBombAt;
-
             while (enabled)
             {
-                Cube cube = CurrentObj;
-
-                cube.LifetimeEnded += Returner;
-                cube.LifetimeEnded += onSpawnBombAtCached;
-
+                Cube cube = GetObject();
+                cube.LifetimeEnded += OnCubeDied;
                 cube.transform.position = RandomGenerator.GetRandomPoint(_spawnArea.bounds);
 
                 await UniTask.WaitForSeconds(_minDelayInSeconds);
             }
         }
 
-        private void OnSpawnBombAt(Cube cube) =>
-            _spawnBomb(cube.transform.position);
+        private void OnCubeDied(Cube cube)
+        {
+            cube.LifetimeEnded -= OnCubeDied;
+            CubeDied?.Invoke(cube.transform.position);
+        }
     }
 }

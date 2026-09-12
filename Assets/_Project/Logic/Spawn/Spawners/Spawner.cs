@@ -1,19 +1,17 @@
-using System;
 using UnityEngine;
 using Core;
 using Spawn.Spawners;
+using Spawn.SpawnObjects;
 
 namespace Spawn
 {
-    internal abstract class Spawner<TSpawnable> : MonoBehaviour where TSpawnable : MonoBehaviour
+    internal abstract class Spawner<TSpawnable> : MonoBehaviour
+        where TSpawnable : MonoBehaviour, IExpirable<TSpawnable>
     {
         [SerializeField] private ObjectPool<TSpawnable> _pool;
 
         private SpawnStatsModel _statsModel;
-        private Action<TSpawnable> _returner;
 
-        protected TSpawnable CurrentObj => GetObject();
-        protected Action<TSpawnable> Returner => _returner ??= ReturnObject;
         protected bool IsStatsModelNull => _statsModel == null;
 
         private void Awake() =>
@@ -25,9 +23,10 @@ namespace Spawn
         public void InitStatsModel(SpawnStatsModel statsModel) =>
             _statsModel = statsModel;
 
-        private TSpawnable GetObject()
+        protected TSpawnable GetObject()
         {
             TSpawnable obj = _pool.Get();
+            obj.LifetimeEnded += ReturnObject;
             _statsModel?.AddSpawned();
             _statsModel?.AddActive();
             return obj;
@@ -35,6 +34,7 @@ namespace Spawn
 
         private void ReturnObject(TSpawnable obj)
         {
+            obj.LifetimeEnded -= ReturnObject;
             _pool.Put(obj);
             _statsModel?.RemoveActive();
         }

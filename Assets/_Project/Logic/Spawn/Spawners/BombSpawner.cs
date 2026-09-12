@@ -7,10 +7,8 @@ namespace Spawn.Spawners
     {
         public void Spawn(Vector3 position)
         {
-            Bomb bomb = CurrentObj;
-            bomb.SetReturner(Returner);
+            Bomb bomb = GetObject();
             bomb.transform.position = position;
-
             bomb.Activate().Forget();
         }
     }
