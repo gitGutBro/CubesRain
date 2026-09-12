@@ -10,9 +10,10 @@ namespace Spawn
         [SerializeField] private ObjectPool<TSpawnable> _pool;
 
         private SpawnStatsModel _statsModel;
+        private Action<TSpawnable> _returner;
 
         protected TSpawnable CurrentObj => GetObject();
-        protected Action<TSpawnable> Returner => ReturnObject;
+        protected Action<TSpawnable> Returner => _returner ??= ReturnObject;
         protected bool IsStatsModelNull => _statsModel == null;
 
         private void Awake() =>

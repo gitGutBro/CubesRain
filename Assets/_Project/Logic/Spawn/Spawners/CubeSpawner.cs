@@ -32,12 +32,14 @@ namespace Spawn.Spawners
 
         private async UniTaskVoid Spawning()
         {
+            Action<Cube> onSpawnBombAtCached = OnSpawnBombAt;
+
             while (enabled)
             {
                 Cube cube = CurrentObj;
 
                 cube.LifetimeEnded += Returner;
-                cube.LifetimeEnded += OnSpawnBombAt;
+                cube.LifetimeEnded += onSpawnBombAtCached;
 
                 cube.transform.position = RandomGenerator.GetRandomPoint(_spawnArea.bounds);
 
