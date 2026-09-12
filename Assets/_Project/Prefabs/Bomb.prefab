@@ -153,10 +153,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bbfa99a4d3b4cc5ad5fda2786bb82ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spawn.SpawnObjects.Bomb
-  _explosionRadius: 5
-  _explosionForce: 100
-  _explosionUpwardsModifier: 0.5
-  _affectedLayers:
-    serializedVersion: 2
-    m_Bits: 64
   _renderer: {fileID: 2175533002291044490}
+  _fader:
+    _minDurationInSeconds: 2
+    _maxDurationInSeconds: 5
+  _exploder:
+    _radius: 5
+    _force: 100
+    _upwardsModifier: 0.5
+    _affectedLayers:
+      serializedVersion: 2
+      m_Bits: 64
